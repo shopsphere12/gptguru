@@ -2,53 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Instant News Updates</title>
   <style>
     body { font-family: Arial, sans-serif; margin:0; background:#f4f4f4; }
     header { background:#222; color:#fff; padding:15px; text-align:center; font-size:24px; }
     .news-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; padding:20px; }
-    .card { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.15); }
+    .card { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.15); cursor:pointer; }
     .card h3 { margin:0 0 10px; font-size:18px; }
     .card p { font-size:14px; color:#555; margin-bottom:10px; }
-    .card a { text-decoration:none; color:#007BFF; font-weight:bold; }
+
+    /* Modal styles */
+    .modal {
+      display:none;
+      position:fixed;
+      z-index:1000;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.8);
+      justify-content:center;
+      align-items:center;
+    }
+    .modal-content {
+      background:#fff;
+      width:90%;
+      height:90%;
+      border-radius:10px;
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+    }
+    .modal-header {
+      background:#222;
+      color:#fff;
+      padding:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .modal-header button {
+      background:red;
+      border:none;
+      color:#fff;
+      padding:5px 10px;
+      border-radius:5px;
+      cursor:pointer;
+    }
+    iframe {
+      flex:1;
+      border:none;
+      width:100%;
+    }
   </style>
 </head>
 <body>
   <header>📰 Instant News Updates</header>
   <div class="news-container" id="news"></div>
 
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>Full Article</span>
+        <button onclick="closeModal()">Close ✖</button>
+      </div>
+      <iframe id="newsFrame"></iframe>
+    </div>
+  </div>
+
   <script>
-    const feedUrl = "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en";
+    const API_KEY = "AIzaSyCMdli1C07zv_jK9dzoWsZ_zu5I_GVFOkA"; // <-- replace with NewsAPI key
+    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKeyAIzaSyCMdli1C07zv_jK9dzoWsZ_zu5I_GVFOkA`;
 
     async function fetchNews() {
       try {
-        const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(feedUrl));
+        const res = await fetch(url);
         const data = await res.json();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "application/xml");
-
-        const items = xml.querySelectorAll("item");
         let output = "";
-        items.forEach((item, i) => {
-          if (i < 15) { // limit to 15 latest
-            const title = item.querySelector("title").textContent;
-            const link = item.querySelector("link").textContent;
-            const pubDate = new Date(item.querySelector("pubDate").textContent).toLocaleString();
-            output += `
-              <div class="card">
-                <h3>${title}</h3>
-                <p><small>${pubDate}</small></p>
-                <a href="${link}" target="_blank">Read more →</a>
-              </div>
-            `;
-          }
+        data.articles.forEach((article, i) => {
+          output += `
+            <div class="card" onclick="openModal('${article.url}')">
+              <h3>${article.title}</h3>
+              <p>${article.description ? article.description.slice(0,100)+"..." : "No summary available."}</p>
+            </div>
+          `;
         });
         document.getElementById("news").innerHTML = output;
       } catch (e) {
         document.getElementById("news").innerHTML = "<p>⚠️ Failed to load news.</p>";
         console.error(e);
       }
+    }
+
+    function openModal(link) {
+      document.getElementById("newsFrame").src = link;
+      document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+      document.getElementById("newsFrame").src = "";
     }
 
     fetchNews();

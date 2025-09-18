@@ -1,386 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Class 9 — Learning Hub</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instant News Updates</title>
   <style>
-    :root{--accent:#0073e6;--card:#fff;--bg:#f5f7fa}
-    *{box-sizing:border-box}
-    body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:#222}
-    header{background:var(--accent);color:#fff;padding:18px 12px;text-align:center}
-    header h1{margin:0 0 6px;font-size:20px}
-    header p{margin:0;font-size:13px;opacity:.95}
-    .wrap{max-width:1100px;margin:18px auto;padding:12px}
-    .topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    .search {flex:1;min-width:220px}
-    input[type="search"]{width:100%;padding:10px;border-radius:8px;border:1px solid #d0d7df}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
-    .subject-card{background:var(--card);padding:14px;border-radius:10px;border:1px solid rgba(0,0,0,.06);cursor:pointer;transition:transform .15s}
-    .subject-card:hover{transform:translateY(-4px)}
-    .subject-card h3{margin:0 0 8px;font-size:16px;color:var(--accent)}
-    section.panel{display:none;background:var(--card);padding:14px;border-radius:10px;border:1px solid rgba(0,0,0,.06);margin-top:14px}
-    section.panel.active{display:block}
-    .back{display:inline-block;margin-bottom:12px;background:#eef6ff;border:1px solid rgba(0,115,230,.12);color:var(--accent);padding:8px 10px;border-radius:8px;cursor:pointer}
-    .chapters{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-    .chapter{background:#fafafa;padding:10px;border-radius:8px;border:1px solid #eee}
-    .chapter h4{margin:0 0 8px;font-size:14px}
-    .btn{display:inline-block;padding:8px 10px;border-radius:8px;text-decoration:none;background:var(--accent);color:#fff;margin-right:8px;margin-top:6px}
-    .btn.secondary{background:#6c757d}
-    .quiz-box{background:#fff;border:1px solid #e6e6e6;padding:12px;border-radius:8px;margin-top:10px}
-    .chatbox{max-width:720px;margin:12px auto;text-align:left}
-    .chat-messages{background:#fff;border:1px solid #e3e3e3;padding:10px;height:220px;overflow:auto;border-radius:8px;margin-bottom:10px}
-    footer{margin:30px 0 10px;text-align:center;color:#666;font-size:13px}
-    @media (max-width:520px){ header h1{font-size:18px}}
+    body { font-family: Arial, sans-serif; margin:0; background:#f4f4f4; }
+    header { background:#222; color:#fff; padding:15px; text-align:center; font-size:24px; }
+    .news-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; padding:20px; }
+    .card { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.15); }
+    .card h3 { margin:0 0 10px; font-size:18px; }
+    .card p { font-size:14px; color:#555; margin-bottom:10px; }
+    .card a { text-decoration:none; color:#007BFF; font-weight:bold; }
   </style>
 </head>
 <body>
-  <header>
-    <div style="max-width:1100px;margin:0 auto;padding:0 12px">
-      <h1>Class 9 — Learning Hub</h1>
-      <p>Notes • Quizzes • Sample Papers • AI Doubt Solver</p>
-    </div>
-  </header>
-
-  <div class="wrap">
-    <div class="topbar">
-      <div style="flex:1;min-width:220px" class="search">
-        <input id="search" type="search" placeholder="Search subject or chapter (e.g., 'The Last Leaf' or 'Probability')" oninput="renderSubjects()">
-      </div>
-      <div style="margin-left:12px">
-        <button class="btn" onclick="showPanel('subjects')">All Subjects</button>
-        <button class="btn secondary" onclick="showPanel('aiPanel')">AI Doubt Solver</button>
-      </div>
-    </div>
-
-    <!-- SUBJECTS GRID -->
-    <div id="subjects" class="grid" aria-live="polite"></div>
-
-    <!-- DYNAMIC PANELS -->
-    <section id="subjectPanel" class="panel" role="region" aria-hidden="true">
-      <button class="back" onclick="showPanel('subjects')">⬅ Back to Subjects</button>
-      <h2 id="subjectTitle"></h2>
-      <div id="chapters" class="chapters"></div>
-    </section>
-
-    <section id="chapterPanel" class="panel" role="region" aria-hidden="true">
-      <button class="back" onclick="showPanel('subjectPanel')">⬅ Back to Subject</button>
-      <h2 id="chapterTitle"></h2>
-
-      <div id="chapterActions" style="margin-top:10px">
-        <a id="notesLink" class="btn" href="#" download>Download Notes (PDF)</a>
-        <a id="sampleLink" class="btn secondary" href="#" download>Download Sample Paper</a>
-        <button class="btn" onclick="openQuiz()">Start Quiz</button>
-      </div>
-
-      <div id="quizArea" class="quiz-box" style="display:none">
-        <div id="quizContent"></div>
-        <div style="margin-top:8px">
-          <button class="btn" onclick="submitQuiz()">Submit Quiz</button>
-          <button class="btn secondary" onclick="closeQuiz()">Close</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI DOUBT SOLVER PANEL -->
-    <section id="aiPanel" class="panel" role="region" aria-hidden="true">
-      <button class="back" onclick="showPanel('subjects')">⬅ Back to Subjects</button>
-      <h2>AI Doubt Solver (Demo)</h2>
-      <p>Type a question about any chapter. This demo uses a local placeholder reply. To enable real AI, connect a serverless backend (Vercel/Firebase) and replace <code>askAI()</code>.</p>
-      <div class="chatbox">
-        <div id="chat" class="chat-messages" aria-live="polite"></div>
-        <div style="display:flex;gap:8px">
-          <input id="qtext" type="text" placeholder="Type your doubt (e.g., 'Explain similes in The Road Not Taken')" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd">
-          <button class="btn" onclick="askAI()">Ask</button>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      <small>Replace placeholders with real PDF paths (e.g., <code>notes/class9/english/the-last-leaf.pdf</code>).</small>
-    </footer>
-  </div>
+  <header>📰 Instant News Updates</header>
+  <div class="news-container" id="news"></div>
 
   <script>
-    /*******************************
-     *  DATA: Subjects & Chapters
-     *  Replace note/samplePaper URLs ("#") with real file paths after uploading PDFs
-     *******************************/
-    const curriculum = [
-      {
-        id: 'english',
-        title: 'English (Prose & Poems)',
-        chapters: [
-          // Main Reader (prose)
-          { title: 'The Fun They Had', notes:'9 class text book/english/chater notes/html2pdf_1757958511.pdf', samplePaper:'9 class text book/english/sample paper/html2pdf_1757958774.pdf' },
-          { title: 'The Sound of Music', notes:'#', samplePaper:'#' },
-          { title: 'The Little Girl', notes:'#', samplePaper:'#' },
-          { title: 'A Truly Beautiful Mind', notes:'#', samplePaper:'#' },
-          { title: 'The Happy Prince', notes:'#', samplePaper:'#' },
-          { title: 'Weathering the Storm in Ersama', notes:'#', samplePaper:'#' },
-          { title: 'The Last Leaf', notes:'#', samplePaper:'#' },
-          { title: 'A House Is Not a Home', notes:'#', samplePaper:'#' },
-          // Poems
-          { title: 'The Road Not Taken (Poem)', notes:'#', samplePaper:'#' },
-          { title: 'Wind (Poem)', notes:'#', samplePaper:'#' },
-          { title: 'Rain on the Roof (Poem)', notes:'#', samplePaper:'#' },
-          { title: 'The Lake Isle of Innisfree (Poem)', notes:'#', samplePaper:'#' },
-          { title: 'A Legend of the Northland (Poem)', notes:'#', samplePaper:'#' },
-          { title: 'No Men Are Foreign (Poem)', notes:'#', samplePaper:'#' },
-          { title: 'The Duck and the Kangaroo (Poem)', notes:'#', samplePaper:'#' },
-          // Moments (Supplementary reader) - stories
-          { title: 'The Lost Child (Supp.)', notes:'#', samplePaper:'#' },
-          { title: 'The Adventures of Toto (Supp.)', notes:'#', samplePaper:'#' },
-          { title: 'Iswaran the Storyteller (Supp.)', notes:'#', samplePaper:'#' },
-          { title: 'In the Kingdom of Fools (Supp.)', notes:'#', samplePaper:'#' },
-          { title: 'The Accidental Tourist (Supp.)', notes:'#', samplePaper:'#' },
-          { title: 'The Beggar (Supp.)', notes:'#', samplePaper:'#' },
-        ]
-      },
-      {
-        id: 'science',
-        title: 'Science (Physics, Chemistry, Biology)',
-        chapters: [
-          // Chemistry
-          { title: 'Matter in Our Surroundings (Chemistry)', notes:'#', samplePaper:'#' },
-          { title: 'Is Matter Around Us Pure (Chemistry)', notes:'#', samplePaper:'#' },
-          { title: 'Atoms and Molecules (Chemistry)', notes:'#', samplePaper:'#' },
-          { title: 'Structure of the Atom (Chemistry)', notes:'#', samplePaper:'#' },
-          // Biology
-          { title: 'The Fundamental Unit of Life (Biology)', notes:'#', samplePaper:'#' },
-          { title: 'Tissues (Biology)', notes:'#', samplePaper:'#' },
-          { title: 'Diversity in Living Organisms (Biology)', notes:'#', samplePaper:'#' },
-          // Physics
-          { title: 'Motion (Physics)', notes:'#', samplePaper:'#' },
-          { title: 'Force and Laws of Motion (Physics)', notes:'#', samplePaper:'#' },
-          { title: 'Gravitation (Physics)', notes:'#', samplePaper:'#' },
-          { title: 'Work and Energy (Physics)', notes:'#', samplePaper:'#' },
-          { title: 'Sound (Physics)', notes:'#', samplePaper:'#' },
-          // Additional bio chapters
-          { title: 'Why Do We Fall Ill (Biology)', notes:'#', samplePaper:'#' },
-          { title: 'Natural Resources (Biology)', notes:'#', samplePaper:'#' },
-          { title: 'Improvement in Food Resources (Biology)', notes:'#', samplePaper:'#' },
-        ]
-      },
-      {
-        id: 'history',
-        title: 'History & Social Science',
-        chapters: [
-          { title: 'The French Revolution', notes:'#', samplePaper:'#' },
-          { title: 'Socialism in Europe and the Russian Revolution', notes:'#', samplePaper:'#' },
-          { title: 'Nazism and the Rise of Hitler', notes:'#', samplePaper:'#' },
-          { title: 'Forest Society and Colonialism', notes:'#', samplePaper:'#' },
-          { title: 'Pastoralists in the Modern World', notes:'#', samplePaper:'#' },
-          { title: 'Peasants and Farmers', notes:'#', samplePaper:'#' },
-          { title: 'History and Sport: The Story of Cricket', notes:'#', samplePaper:'#' },
-          { title: 'Clothing: A Social History', notes:'#', samplePaper:'#' },
-        ]
-      },
-      {
-        id: 'geography',
-        title: 'Geography',
-        chapters: [
-          { title: 'India – Size and Location', notes:'#', samplePaper:'#' },
-          { title: 'Physical Features of India', notes:'#', samplePaper:'#' },
-          { title: 'Drainage', notes:'#', samplePaper:'#' },
-          { title: 'Climate', notes:'#', samplePaper:'#' },
-          { title: 'Natural Vegetation and Wildlife', notes:'#', samplePaper:'#' },
-          { title: 'Population', notes:'#', samplePaper:'#' },
-          { title: 'Forest Society and Colonialism (Geo related)', notes:'#', samplePaper:'#' },
-        ]
-      },
-      {
-        id: 'civics',
-        title: 'Political Science / Civics',
-        chapters: [
-          { title: 'Constitutional Design, Electoral Politics, and Working of Institutions', notes:'#', samplePaper:'#' },
-          { title: 'People as Resource', notes:'#', samplePaper:'#' },
-          { title: 'Poverty as a Challenge', notes:'#', samplePaper:'#' },
-          { title: 'Food Security in India', notes:'#', samplePaper:'#' },
-          { title: 'The Story of Village Palampur', notes:'#', samplePaper:'#' },
-        ]
-      },
-      {
-        id: 'math',
-        title: 'Mathematics',
-        chapters: [
-          { title: 'Number Systems', notes:'#', samplePaper:'#' },
-          { title: 'Polynomials', notes:'#', samplePaper:'#' },
-          { title: 'Factorisation of Polynomials', notes:'#', samplePaper:'#' },
-          { title: 'Linear Equations in Two Variables', notes:'#', samplePaper:'#' },
-          { title: 'Coordinate Geometry', notes:'#', samplePaper:'#' },
-          { title: 'Introduction to Euclid\'s Geometry', notes:'#', samplePaper:'#' },
-          { title: 'Lines and Angles', notes:'#', samplePaper:'#' },
-          { title: 'Triangles', notes:'#', samplePaper:'#' },
-          { title: 'Congruence of Triangles and Inequalities in a Triangle', notes:'#', samplePaper:'#' },
-          { title: 'Quadrilaterals', notes:'#', samplePaper:'#' },
-          { title: 'Areas of Parallelograms and Triangles', notes:'#', samplePaper:'#' },
-          { title: 'Circles', notes:'#', samplePaper:'#' },
-          { title: 'Geometrical Constructions', notes:'#', samplePaper:'#' },
-          { title: 'Areas of Triangles and Quadrilaterals', notes:'#', samplePaper:'#' },
-          { title: 'Volume and Surface Area of Solids', notes:'#', samplePaper:'#' },
-          { title: 'Presentation of Data in Tabular Form', notes:'#', samplePaper:'#' },
-          { title: 'Bar Graph, Histogram and Frequency Polygon', notes:'#', samplePaper:'#' },
-          { title: 'Mean, Median and Mode of Ungrouped Data', notes:'#', samplePaper:'#' },
-          { title: 'Probability', notes:'#', samplePaper:'#' },
-        ]
-      }
-    ];
+    const feedUrl = "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en";
 
-    /*******************************
-     *  RENDER SUBJECTS GRID
-     *******************************/
-    const subjectsEl = document.getElementById('subjects');
-    const searchInput = document.getElementById('search');
+    async function fetchNews() {
+      try {
+        const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(feedUrl));
+        const data = await res.json();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, "application/xml");
 
-    function renderSubjects(){
-      const q = (searchInput.value || '').toLowerCase().trim();
-      subjectsEl.innerHTML = '';
-      curriculum.forEach(sub => {
-        // If search query exists, filter by subject title or chapter titles
-        const matches = !q || sub.title.toLowerCase().includes(q) || sub.chapters.some(c=>c.title.toLowerCase().includes(q));
-        if(!matches) return;
-        const card = document.createElement('div');
-        card.className = 'subject-card';
-        card.tabIndex = 0;
-        card.innerHTML = `<h3>${sub.title}</h3><div style="font-size:13px;color:#444">${sub.chapters.length} chapters</div>`;
-        card.onclick = ()=>openSubject(sub.id);
-        card.onkeypress = (e)=>{ if(e.key==='Enter') openSubject(sub.id) };
-        subjectsEl.appendChild(card);
-      });
-      if(subjectsEl.children.length===0){
-        subjectsEl.innerHTML = '<p style="padding:12px;background:#fff;border-radius:8px">No results. Try another search.</p>';
-      }
-    }
-
-    /*******************************
-     *  OPEN SUBJECT -> LIST CHAPTERS
-     *******************************/
-    function openSubject(id){
-      const sub = curriculum.find(s=>s.id===id);
-      if(!sub) return;
-      document.getElementById('subjectTitle').innerText = sub.title;
-      const chaptersEl = document.getElementById('chapters');
-      chaptersEl.innerHTML = '';
-      sub.chapters.forEach((c, idx) => {
-        const div = document.createElement('div');
-        div.className = 'chapter';
-        div.innerHTML = `<h4>${idx+1}. ${c.title}</h4>
-          <div>
-            <a class="btn" href="${c.notes || '#'}" ${c.notes && c.notes!=='#' ? 'download':''}>Notes</a>
-            <a class="btn secondary" href="${c.samplePaper || '#'}" ${c.samplePaper && c.samplePaper!=='#' ? 'download':''}>Sample Paper</a>
-            <button class="btn" onclick='openChapter("${id}", ${idx})'>Open</button>
-          </div>`;
-        chaptersEl.appendChild(div);
-      });
-      showPanel('subjectPanel');
-    }
-
-    /*******************************
-     *  OPEN CHAPTER -> SHOW ACTIONS
-     *******************************/
-    let currentChapter = null;
-    function openChapter(subjectId, chapterIndex){
-      const sub = curriculum.find(s=>s.id===subjectId);
-      if(!sub) return;
-      const ch = sub.chapters[chapterIndex];
-      currentChapter = { subjectId, chapterIndex };
-      document.getElementById('chapterTitle').innerText = `${sub.title} — ${ch.title}`;
-      document.getElementById('notesLink').href = ch.notes || '#';
-      document.getElementById('sampleLink').href = ch.samplePaper || '#';
-      document.getElementById('quizArea').style.display = 'none';
-      document.getElementById('quizContent').innerHTML = '';
-      showPanel('chapterPanel');
-    }
-
-    /*******************************
-     *  QUIZ: TEMPLATE (SAMPLE)
-     *  NOTE: Replace with real quiz data per chapter later.
-     *******************************/
-    function openQuiz(){
-      // Sample 2-question quiz; in production, fetch per chapter JSON
-      const sampleQuiz = [
-        { q: 'What is the main theme of the chapter?', choices:['Love','Friendship','Technology','Courage'], answer:2 },
-        { q: 'Choose the correct statement related to the chapter.', choices:['Option A','Option B','Option C','Option D'], answer:1 }
-      ];
-      const qc = document.getElementById('quizContent');
-      qc.innerHTML = '';
-      sampleQuiz.forEach((item,i)=>{
-        const wrap = document.createElement('div');
-        wrap.style.marginBottom = '10px';
-        let html = `<div style="font-weight:600;margin-bottom:6px">${i+1}. ${item.q}</div>`;
-        item.choices.forEach((ch,j)=>{
-          html += `<label style="display:block;margin:4px 0"><input type="radio" name="q${i}" value="${j}"> ${ch}</label>`;
+        const items = xml.querySelectorAll("item");
+        let output = "";
+        items.forEach((item, i) => {
+          if (i < 15) { // limit to 15 latest
+            const title = item.querySelector("title").textContent;
+            const link = item.querySelector("link").textContent;
+            const pubDate = new Date(item.querySelector("pubDate").textContent).toLocaleString();
+            output += `
+              <div class="card">
+                <h3>${title}</h3>
+                <p><small>${pubDate}</small></p>
+                <a href="${link}" target="_blank">Read more →</a>
+              </div>
+            `;
+          }
         });
-        wrap.innerHTML = html;
-        qc.appendChild(wrap);
-      });
-      // store sampleQuiz on element for grading
-      qc._quiz = sampleQuiz;
-      document.getElementById('quizArea').style.display = 'block';
-    }
-
-    function submitQuiz(){
-      const qc = document.getElementById('quizContent');
-      const quiz = qc._quiz || [];
-      if(!quiz.length){ alert('No quiz loaded.'); return; }
-      let score = 0;
-      quiz.forEach((item,i)=>{
-        const sel = document.querySelector(`input[name=q${i}]:checked`);
-        if(sel && parseInt(sel.value) === item.answer) score++;
-      });
-      alert(`Score: ${score} / ${quiz.length}`);
-    }
-
-    function closeQuiz(){
-      document.getElementById('quizArea').style.display = 'none';
-    }
-
-    /*******************************
-     *  AI DOUBT SOLVER (DEMO)
-     *  Replace askAI() with code calling your backend that proxies OpenAI
-     *******************************/
-    function askAI(){
-      const q = document.getElementById('qtext').value.trim();
-      if(!q) return;
-      const chat = document.getElementById('chat');
-      const userHtml = `<div style="margin:8px 0"><strong>You:</strong> ${escapeHtml(q)}</div>`;
-      chat.innerHTML += userHtml;
-      // placeholder AI reply (make asynchronous when real backend connected)
-      const reply = generatePlaceholderReply(q);
-      chat.innerHTML += `<div style="margin:6px 0;color:#0b4a85"><strong>AI:</strong> ${escapeHtml(reply)}</div>`;
-      document.getElementById('qtext').value = '';
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function generatePlaceholderReply(q){
-      // small heuristic to produce a helpful placeholder
-      if(/explain|meaning|summar/i.test(q)) return "This chapter's main idea: summarise the key points and look up unfamiliar words. For detailed line-by-line explanation, connect the site to a backend using OpenAI API.";
-      if(/poem|meter|rhyme|imagery/i.test(q)) return "Look for rhyme schemes and repeated images. Identify metaphors and similes and explain what they compare.";
-      if(/solve|example|question|probab|probability/i.test(q)) return "Show your working for numerical problems. For step-by-step help, enable the real AI backend.";
-      return "Good question — to enable full AI answers, deploy a secure serverless backend (Vercel/Firebase) and connect the front end to it. This is a placeholder reply.";
-    }
-
-    function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
-
-    /*******************************
-     *  UI HELPERS
-     *******************************/
-    function showPanel(panelId){
-      // hide all panels then show requested
-      document.querySelectorAll('section.panel').forEach(p=>{ p.classList.remove('active'); p.setAttribute('aria-hidden','true'); });
-      if(panelId === 'subjects'){
-        renderSubjects();
-        window.scrollTo({top:0,behavior:'smooth'});
-        return;
+        document.getElementById("news").innerHTML = output;
+      } catch (e) {
+        document.getElementById("news").innerHTML = "<p>⚠️ Failed to load news.</p>";
+        console.error(e);
       }
-      const el = document.getElementById(panelId);
-      if(el){ el.classList.add('active'); el.setAttribute('aria-hidden','false'); window.scrollTo({top:el.offsetTop-10,behavior:'smooth'}); }
     }
 
-    // init
-    renderSubjects();
+    fetchNews();
+    setInterval(fetchNews, 60000); // refresh every 1 min
   </script>
 </body>
 </html>
-

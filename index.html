@@ -2,55 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Instant News Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live GNews - Instant News</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+      color: #333;
+    }
+    header {
+      background: #0a3d62;
+      color: white;
       padding: 20px;
+      text-align: center;
     }
-    h1 { text-align: center; }
-    .news {
-      max-width: 800px;
-      margin: 20px auto;
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    .news-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .news-card {
       background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
     }
-    .news img { width: 100%; border-radius: 8px; }
-    .news h2 { margin: 10px 0; }
-    .news a { color: blue; text-decoration: none; }
+    .news-card:hover {
+      transform: translateY(-5px);
+    }
+    .news-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .news-card .content {
+      padding: 15px;
+    }
+    .news-card h2 {
+      font-size: 1.2rem;
+      margin: 0 0 10px;
+      color: #0a3d62;
+    }
+    .news-card p {
+      font-size: 0.9rem;
+      margin: 0 0 10px;
+      color: #555;
+    }
+    .news-card a {
+      text-decoration: none;
+      color: #fff;
+      background: #0a3d62;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      display: inline-block;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #0a3d62;
+      color: white;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>Latest News</h1>
-  <div id="newsContainer"></div>
+  <header>
+    <h1>📰 Live GNews Updates</h1>
+    <p>Instant news powered by GNews API</p>
+  </header>
+
+  <div class="news-container" id="newsContainer"></div>
+
+  <footer>
+    <p>© 2025 Instant News | Powered by GNews API</p>
+  </footer>
 
   <script>
-    const apiKey = "YOUR_API_KEY"; // Replace with your NewsAPI key
-    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${apiKey}`;
+    const apiKey = "YOUR_API_KEY"; // 🔑 Replace with your GNews API key
+    const url = `https://gnews.io/api/v4/top-headlines?lang=en&country=in&max=12&apikey=${apiKey}`;
 
     async function fetchNews() {
-      const res = await fetch(url);
-      const data = await res.json();
-      const container = document.getElementById("newsContainer");
-      container.innerHTML = "";
-      data.articles.forEach(article => {
-        const div = document.createElement("div");
-        div.className = "news";
-        div.innerHTML = `
-          <img src="${article.urlToImage || ''}" alt="News Image">
-          <h2>${article.title}</h2>
-          <p>${article.description || ''}</p>
-          <a href="${article.url}" target="_blank">Read more</a>
-        `;
-        container.appendChild(div);
-      });
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const container = document.getElementById("newsContainer");
+        container.innerHTML = "";
+
+        data.articles.forEach(article => {
+          const card = document.createElement("div");
+          card.className = "news-card";
+          card.innerHTML = `
+            <img src="${article.image || 'https://via.placeholder.com/400'}" alt="News Image">
+            <div class="content">
+              <h2>${article.title}</h2>
+              <p>${article.description || ''}</p>
+              <a href="${article.url}" target="_blank">Read More</a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      }
     }
 
     fetchNews();
-    setInterval(fetchNews, 60000); // refresh every 1 minute
+    setInterval(fetchNews, 300000); // refresh every 5 minutes
   </script>
 </body>
 </html>

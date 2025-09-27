@@ -2,110 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Instant News Updates</title>
+  <title>Instant News Website</title>
   <style>
-    body { font-family: Arial, sans-serif; margin:0; background:#f4f4f4; }
-    header { background:#222; color:#fff; padding:15px; text-align:center; font-size:24px; }
-    .news-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; padding:20px; }
-    .card { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.15); cursor:pointer; }
-    .card h3 { margin:0 0 10px; font-size:18px; }
-    .card p { font-size:14px; color:#555; margin-bottom:10px; }
-
-    /* Modal styles */
-    .modal {
-      display:none;
-      position:fixed;
-      z-index:1000;
-      top:0; left:0;
-      width:100%; height:100%;
-      background:rgba(0,0,0,0.8);
-      justify-content:center;
-      align-items:center;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
     }
-    .modal-content {
-      background:#fff;
-      width:90%;
-      height:90%;
-      border-radius:10px;
-      overflow:hidden;
-      position:relative;
-      display:flex;
-      flex-direction:column;
+    h1 { text-align: center; }
+    .news {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .modal-header {
-      background:#222;
-      color:#fff;
-      padding:10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .modal-header button {
-      background:red;
-      border:none;
-      color:#fff;
-      padding:5px 10px;
-      border-radius:5px;
-      cursor:pointer;
-    }
-    iframe {
-      flex:1;
-      border:none;
-      width:100%;
-    }
+    .news img { width: 100%; border-radius: 8px; }
+    .news h2 { margin: 10px 0; }
+    .news a { color: blue; text-decoration: none; }
   </style>
 </head>
 <body>
-  <header>📰 Instant News Updates</header>
-  <div class="news-container" id="news"></div>
-
-  <!-- Modal -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span>Full Article</span>
-        <button onclick="closeModal()">Close ✖</button>
-      </div>
-      <iframe id="newsFrame"></iframe>
-    </div>
-  </div>
+  <h1>Latest News</h1>
+  <div id="newsContainer"></div>
 
   <script>
-    const API_KEY = "AIzaSyCMdli1C07zv_jK9dzoWsZ_zu5I_GVFOkA"; // <-- replace with NewsAPI key
-    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKeyAIzaSyCMdli1C07zv_jK9dzoWsZ_zu5I_GVFOkA`;
+    const apiKey = "YOUR_API_KEY"; // Replace with your NewsAPI key
+    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${apiKey}`;
 
     async function fetchNews() {
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        let output = "";
-        data.articles.forEach((article, i) => {
-          output += `
-            <div class="card" onclick="openModal('${article.url}')">
-              <h3>${article.title}</h3>
-              <p>${article.description ? article.description.slice(0,100)+"..." : "No summary available."}</p>
-            </div>
-          `;
-        });
-        document.getElementById("news").innerHTML = output;
-      } catch (e) {
-        document.getElementById("news").innerHTML = "<p>⚠️ Failed to load news.</p>";
-        console.error(e);
-      }
-    }
-
-    function openModal(link) {
-      document.getElementById("newsFrame").src = link;
-      document.getElementById("modal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-      document.getElementById("newsFrame").src = "";
+      const res = await fetch(url);
+      const data = await res.json();
+      const container = document.getElementById("newsContainer");
+      container.innerHTML = "";
+      data.articles.forEach(article => {
+        const div = document.createElement("div");
+        div.className = "news";
+        div.innerHTML = `
+          <img src="${article.urlToImage || ''}" alt="News Image">
+          <h2>${article.title}</h2>
+          <p>${article.description || ''}</p>
+          <a href="${article.url}" target="_blank">Read more</a>
+        `;
+        container.appendChild(div);
+      });
     }
 
     fetchNews();
-    setInterval(fetchNews, 60000); // refresh every 1 min
+    setInterval(fetchNews, 60000); // refresh every 1 minute
   </script>
 </body>
 </html>
